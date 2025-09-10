@@ -718,6 +718,7 @@ def unauthorized(error):
 
 if __name__ == '__main__':
     print("Starting Heritage Foods Gap Analysis Dashboard with Authentication...")
-    print("Login will be available at: http://localhost:5000")
+    print("Login will be available at: http://localhost:8000")
     print("Dashboard will be available at: http://localhost:5000/dashboard (after login)")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+    app.run(debug=True, host='0.0.0.0', port=8000)
