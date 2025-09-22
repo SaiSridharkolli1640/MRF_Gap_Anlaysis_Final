@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Reports - Gap Analysis Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --accent-color: #dc2626;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --dark-color: #1f2937;
+            --light-bg: #f8fafc;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            box-shadow: var(--shadow);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white !important;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+        }
+
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .stats-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .stats-card .card-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: white;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .filter-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .filter-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+        }
+
+        .filter-header h5 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #ea580c 100%);
+            color: white;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .table-responsive {
+            max-height: 600px;  /* Increased from calc(100vh - 400px) */
+            overflow-y: auto;
+            min-height: 400px;  /* Ensure minimum height to show more records */
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .table-header h4 {
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .record-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+            color: white;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            background: var(--light-bg);
+            color: var(--dark-color);
+            border: none;
+            font-weight: 700;
+            padding: 1rem 0.75rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background: var(--light-bg);
+            transform: scale(1.01);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .table tfoot {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .table tfoot td {
+            border-top: 2px solid var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .reason-badge {
+            background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+            color: #6b21a8;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 2px solid #a78bfa;
+            white-space: nowrap;
+        }
+
+        .user-badge {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 2px solid #93c5fd;
+        }
+
+        .fill-rate-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 60px;
+            display: inline-block;
+        }
+
+        .fill-rate-low {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: var(--accent-color);
+            border: 2px solid #fecaca;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            background: var(--light-bg);
+            border-radius: 15px;
+            margin: 2rem;
+        }
+
+        .spinner-border {
+            color: var(--secondary-color);
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+            padding: 1.2rem;
+            font-weight: 600;
+        }
+
+        .text-truncate-custom {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .date-input-group {
+            position: relative;
+        }
+
+        .date-input-group .form-control {
+            padding-left: 2.5rem;
+        }
+
+        .date-input-group i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            z-index: 5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .chart-container canvas {
+            max-width: 100% !important;
+            height: auto !important;
+            max-height: 300px !important;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .table-responsive {
+                font-size: 0.8rem;
+                max-height: calc(100vh - 350px);
+            }
+            
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .filter-card .row > div {
+                margin-bottom: 1rem;
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .user-info {
+                margin: 0.5rem 0;
+                word-break: break-all;
+            }
+
+            .table-header-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+
+            .text-truncate-custom {
+                max-width: 120px;
+            }
+
+            .table td {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .table th {
+                padding: 0.75rem 0.25rem;
+                font-size: 0.75rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                padding: 1rem;
+                margin-bottom: 1rem;
+                overflow: hidden;
+            }
+
+            .chart-container canvas {
+                max-width: 100% !important;
+                width: 100% !important;
+                max-height: 250px !important;
+            }
+
+            .chart-container > div {
+                height: 250px !important;
+            }
+
+            .filter-card {
+                margin-bottom: 1rem;
+            }
+
+            .filter-card .p-4 {
+                padding: 1rem !important;
+            }
+
+            .row.mb-4 .col-lg-6 {
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .container {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+            .text-truncate-custom {
+                max-width: 80px;
+            }
+
+            .table td, .table th {
+                padding: 0.3rem 0.1rem;
+                font-size: 0.7rem;
+            }
+
+            .user-badge, .reason-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            .fill-rate-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+                min-width: 45px;
+            }
+
+            .chart-container {
+                padding: 0.5rem;
+                border-radius: 10px;
+            }
+
+            .chart-title {
+                font-size: 1rem;
+            }
+
+            .chart-container > div {
+                height: 200px !important;
+            }
+
+            .chart-container canvas {
+                max-height: 200px !important;
+            }
+
+            .row.mb-4 .col-lg-6 {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-analytics"></i>
+                Gap Analysis Dashboard
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                    <a class="nav-link active" href="/reports">
+                        <i class="fas fa-chart-bar me-1"></i>Feedback Reports
+                    </a>
+                </div>
+                <div class="navbar-nav d-flex align-items-center">
+                    <div class="user-info">
+                        <i class="fas fa-user me-2"></i>
+                        <span id="user-email">{{ user_email }}</span>
+                    </div>
+                    <button class="logout-btn" id="logout-btn">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Summary Statistics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="stats-card animate-fade-in">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line me-2"></i>Feedback Summary Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" id="summary-stats">
+                            <!-- Stats will be loaded dynamically from API -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <div class="col-lg-6">
+                <div class="chart-container animate-fade-in">
+                    <h6 class="chart-title">
+                        <i class="fas fa-pie-chart me-2"></i>Feedback by Reason
+                    </h6>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="reasonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container animate-fade-in">
+                    <h6 class="chart-title">
+                        <i class="fas fa-users me-2"></i>Top Contributors
+                    </h6>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm" id="userStatsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Feedback Count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userStatsBody">
+                                <!-- User stats will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="filter-card animate-fade-in">
+                    <div class="filter-header">
+                        <h5><i class="fas fa-filter"></i>Report Filters</h5>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-3">
+                            <!-- User Filter -->
+                            <div class="col-lg-2 col-md-4">
+                                <label for="user-filter" class="form-label">
+                                    <i class="fas fa-user me-1"></i>User
+                                </label>
+                                <select class="form-select" id="user-filter">
+                                    <option value="">All Users</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Reason Filter -->
+                            <div class="col-lg-2 col-md-4">
+                                <label for="reason-filter" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Reason
+                                </label>
+                                <select class="form-select" id="reason-filter">
+                                    <option value="">All Reasons</option>
+                                </select>
+                            </div>
+
+                            <!-- State Filter -->
+                            <div class="col-lg-2 col-md-4">
+                                <label for="state-filter" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i>State
+                                </label>
+                                <select class="form-select" id="state-filter">
+                                    <option value="">All States</option>
+                                </select>
+                            </div>
+
+                            <!-- Plant Filter -->
+                            <div class="col-lg-2 col-md-4">
+                                <label for="plant-filter" class="form-label">
+                                    <i class="fas fa-industry me-1"></i>Plant
+                                </label>
+                                <select class="form-select" id="plant-filter">
+                                    <option value="">All Plants</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Date From -->
+                            <div class="col-lg-2 col-md-4">
+                                <label for="date-from-filter" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>Date From
+                                </label>
+                                <div class="date-input-group">
+                                    <i class="fas fa-calendar"></i>
+                                    <input type="date" class="form-control" id="date-from-filter">
+                                </div>
+                            </div>
+                            
+                            <!-- Date To -->
+                            <div class="col-lg-2 col-md-4">
+                                <label for="date-to-filter" class="form-label">
+                                    <i class="fas fa-calendar-check me-1"></i>Date To
+                                </label>
+                                <div class="date-input-group">
+                                    <i class="fas fa-calendar"></i>
+                                    <input type="date" class="form-control" id="date-to-filter">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="row mt-3">
+                            <div class="col-12 d-flex gap-2 flex-wrap">
+                                <button class="btn btn-primary" id="apply-filters">
+                                    <i class="fas fa-search me-1"></i>Apply Filters
+                                </button>
+                                <button class="btn btn-secondary" id="clear-filters">
+                                    <i class="fas fa-eraser me-1"></i>Clear All
+                                </button>
+                                <button class="btn btn-info" id="this-week-filter">
+                                    <i class="fas fa-calendar-week me-1"></i>This Week
+                                </button>
+                                <button class="btn btn-warning" id="this-month-filter">
+                                    <i class="fas fa-calendar-month me-1"></i>This Month
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Reports Table -->
+        <div class="table-container animate-fade-in">
+            <div class="table-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-comments"></i>Feedback Reports</h4>
+                    <div class="table-header-controls">
+                        <div class="record-badge" id="record-count">0 records</div>
+                        <a href="#" class="download-btn" id="download-feedback-btn">
+                            <i class="fas fa-download me-1"></i>Download Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="feedback-loading" class="loading">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="mt-3 text-muted">Loading feedback reports...</h5>
+            </div>
+            
+            <div id="feedback-data-container" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>User</th>
+                                <th>Reason</th>
+                                <th>Comments</th>
+                                <th>PO Number</th>
+                                <th>Material</th>
+                                <th>Fill Rate</th>
+                                <th>State</th>
+                                <th>Plant</th>
+                                <th>Feedback Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedback-table-body">
+                            <!-- Data will be populated dynamically from API -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plant & Date wise Feedback Statistics -->
+        <div class="table-container animate-fade-in">
+            <div class="table-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-industry"></i>Plant & Date wise Feedback Status</h4>
+                    <div class="table-header-controls">
+                        <div class="record-badge" id="plant-record-count">0 records</div>
+                        <a href="#" class="download-btn" id="download-plant-btn">
+                            <i class="fas fa-download me-1"></i>Download Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="plant-loading" class="loading">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="mt-3 text-muted">Loading plant statistics...</h5>
+            </div>
+            
+            <div id="plant-data-container" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Plant Name</th>
+                                <th>State</th>
+                                <th>Date</th>
+                                <th>Total Records</th>
+                                <th>Feedback Provided</th>
+                                <th>Pending Feedback</th>
+                                <th>Completion %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plant-stats-body">
+                            <!-- Plant stats will be populated here -->
+                        </tbody>
+                        <tfoot id="plant-stats-footer">
+                            <!-- Grand total will be populated here -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        let allFeedbackData = [];
+        let allPlantData = [];
+        let currentFilters = {};
+        let reasonChart = null;
+
+        // Load page data on load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFilterOptions();
+            loadSummaryStats();
+            loadReportsData();
+            loadPlantFeedbackStats();
+            
+            // Event handlers
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('download-feedback-btn').addEventListener('click', downloadFeedbackReports);
+            document.getElementById('download-plant-btn').addEventListener('click', downloadPlantReports);
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('clear-filters').addEventListener('click', clearFilters);
+            document.getElementById('this-week-filter').addEventListener('click', setThisWeekFilter);
+            document.getElementById('this-month-filter').addEventListener('click', setThisMonthFilter);
+        });
+
+        async function logout() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST'
+                });
+                
+                window.location.href = '/login';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        async function loadFilterOptions() {
+            try {
+                const response = await fetch('/api/reports-filter-options');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Error loading filter options:', data.error);
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                    }
+                    return;
+                }
+                
+                // Populate user filter
+                const userSelect = document.getElementById('user-filter');
+                userSelect.innerHTML = '<option value="">All Users</option>';
+                data.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user;
+                    option.textContent = user;
+                    userSelect.appendChild(option);
+                });
+
+                // Populate reason filter
+                const reasonSelect = document.getElementById('reason-filter');
+                reasonSelect.innerHTML = '<option value="">All Reasons</option>';
+                data.reasons.forEach(reason => {
+                    const option = document.createElement('option');
+                    option.value = reason;
+                    option.textContent = reason;
+                    reasonSelect.appendChild(option);
+                });
+
+                // Populate state filter
+                const stateSelect = document.getElementById('state-filter');
+                stateSelect.innerHTML = '<option value="">All States</option>';
+                data.states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    stateSelect.appendChild(option);
+                });
+
+                // Populate plant filter
+                const plantSelect = document.getElementById('plant-filter');
+                plantSelect.innerHTML = '<option value="">All Plants</option>';
+                data.plants.forEach(plant => {
+                    const option = document.createElement('option');
+                    option.value = plant;
+                    option.textContent = plant;
+                    plantSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error loading filter options:', error);
+                if (error.message.includes('401')) {
+                    window.location.href = '/login';
+                }
+            }
+        }
+
+        async function loadSummaryStats() {
+            try {
+                const response = await fetch('/api/feedback-summary-stats');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Error loading summary stats:', data.error);
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                    }
+                    return;
+                }
+                
+                // Display summary statistics
+                const summaryStatsEl = document.getElementById('summary-stats');
+                summaryStatsEl.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-number">${data.total_feedback}</div>
+                        <div class="stat-label">Total Feedback</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${data.unique_users}</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${data.reason_stats.length}</div>
+                        <div class="stat-label">Unique Reasons</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${data.state_stats.length}</div>
+                        <div class="stat-label">States Covered</div>
+                    </div>
+                `;
+
+                // Create charts and populate tables
+                createReasonChart(data.reason_stats);
+                populateUserStatsTable(data.user_stats.slice(0, 10)); // Top 10 users
+                
+            } catch (error) {
+                console.error('Error loading summary stats:', error);
+                if (error.message.includes('401')) {
+                    window.location.href = '/login';
+                }
+            }
+        }
+
+        function populateUserStatsTable(userStats) {
+            const tbody = document.getElementById('userStatsBody');
+            tbody.innerHTML = '';
+            
+            if (userStats.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="2" class="text-center text-muted">No user data available</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            userStats.forEach((user, index) => {
+                const row = document.createElement('tr');
+                const userDisplay = user.user.split('@')[0]; // Show only username part
+                
+                row.innerHTML = `
+                    <td>
+                        <span class="user-badge" title="${user.user}">
+                            <i class="fas fa-user me-1"></i>${userDisplay}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">${user.count}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function loadPlantFeedbackStats() {
+            try {
+                const response = await fetch('/api/plant-feedback-stats');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Error loading plant feedback stats:', data.error);
+                    document.getElementById('plant-loading').innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Plant statistics not available: ${data.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allPlantData = data.plant_stats || [];
+                displayPlantData(allPlantData);
+                
+                document.getElementById('plant-loading').style.display = 'none';
+                document.getElementById('plant-data-container').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading plant feedback stats:', error);
+                document.getElementById('plant-loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading plant statistics. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function displayPlantData(plantStats) {
+            const tbody = document.getElementById('plant-stats-body');
+            const tfoot = document.getElementById('plant-stats-footer');
+            const recordCount = document.getElementById('plant-record-count');
+            
+            tbody.innerHTML = '';
+            recordCount.textContent = `${plantStats.length} records`;
+            
+            if (plantStats.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-info-circle text-muted me-2"></i>
+                            No plant feedback statistics available
+                        </td>
+                    </tr>
+                `;
+                tfoot.innerHTML = '';
+                return;
+            }
+            
+            // Calculate totals
+            let totalRecords = 0;
+            let totalFeedbackProvided = 0;
+            let totalPending = 0;
+            
+            plantStats.forEach(plant => {
+                const row = document.createElement('tr');
+                const completionPercentage = plant.total_records > 0 ? 
+                    ((plant.feedback_provided / plant.total_records) * 100).toFixed(1) : 0;
+                
+                let completionBadgeClass = 'bg-danger';
+                if (completionPercentage >= 80) completionBadgeClass = 'bg-success';
+                else if (completionPercentage >= 50) completionBadgeClass = 'bg-warning';
+                
+                row.innerHTML = `
+                    <td><strong>${plant.plant_name}</strong></td>
+                    <td><small class="text-muted">${plant.state}</small></td>
+                    <td><small class="text-muted">${plant.date}</small></td>
+                    <td><span class="badge bg-info">${plant.total_records}</span></td>
+                    <td><span class="badge bg-success">${plant.feedback_provided}</span></td>
+                    <td><span class="badge bg-warning">${plant.pending_feedback}</span></td>
+                    <td><span class="badge ${completionBadgeClass}">${completionPercentage}%</span></td>
+                `;
+                tbody.appendChild(row);
+                
+                // Add to totals
+                totalRecords += plant.total_records;
+                totalFeedbackProvided += plant.feedback_provided;
+                totalPending += plant.pending_feedback;
+            });
+            
+            // Calculate overall completion percentage
+            const overallCompletion = totalRecords > 0 ? 
+                ((totalFeedbackProvided / totalRecords) * 100).toFixed(1) : 0;
+            
+            let overallBadgeClass = 'bg-danger';
+            if (overallCompletion >= 80) overallBadgeClass = 'bg-success';
+            else if (overallCompletion >= 50) overallBadgeClass = 'bg-warning';
+            
+            // Add grand total row
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="3"><strong>GRAND TOTAL</strong></td>
+                    <td><span class="badge bg-info fs-6">${totalRecords}</span></td>
+                    <td><span class="badge bg-success fs-6">${totalFeedbackProvided}</span></td>
+                    <td><span class="badge bg-warning fs-6">${totalPending}</span></td>
+                    <td><span class="badge ${overallBadgeClass} fs-6">${overallCompletion}%</span></td>
+                </tr>
+            `;
+        }
+
+        function createReasonChart(reasonStats) {
+            const ctx = document.getElementById('reasonChart').getContext('2d');
+            
+            if (reasonChart) {
+                reasonChart.destroy();
+            }
+
+            if (reasonStats.length === 0) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#6b7280';
+                ctx.textAlign = 'center';
+                ctx.fillText('No reason data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            reasonChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: reasonStats.map(item => item.reason),
+                    datasets: [{
+                        data: reasonStats.map(item => item.count),
+                        backgroundColor: [
+                            '#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6',
+                            '#f97316', '#06b6d4', '#84cc16', '#ec4899', '#6b7280'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadReportsData() {
+            try {
+                const response = await fetch('/api/feedback-reports-data');
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    document.getElementById('feedback-loading').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error loading data: ${result.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allFeedbackData = result.data;
+                displayFeedbackData(allFeedbackData);
+                
+                document.getElementById('feedback-loading').style.display = 'none';
+                document.getElementById('feedback-data-container').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading reports data:', error);
+                if (error.message.includes('401')) {
+                    window.location.href = '/login';
+                    return;
+                }
+                document.getElementById('feedback-loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading data. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function displayFeedbackData(data) {
+            const tbody = document.getElementById('feedback-table-body');
+            const recordCount = document.getElementById('record-count');
+            
+            tbody.innerHTML = '';
+            recordCount.textContent = `${data.length} records`;
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <i class="fas fa-info-circle text-muted me-2"></i>
+                            No feedback reports found for the selected criteria
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.forEach((record, index) => {
+                const row = document.createElement('tr');
+                
+                const userDisplay = record.user_email.split('@')[0]; // Show only username part
+                const commentsDisplay = record.comments || 'No comments';
+                
+                row.innerHTML = `
+                    <td><span class="fw-bold text-primary">${index + 1}</span></td>
+                    <td>
+                        <span class="user-badge" title="${record.user_email}">
+                            <i class="fas fa-user me-1"></i>${userDisplay}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="reason-badge">
+                            ${record.reason}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="text-truncate-custom" title="${commentsDisplay}">
+                            ${commentsDisplay}
+                        </div>
+                    </td>
+                    <td><span class="fw-bold">${record.po_no}</span></td>
+                    <td>
+                        <div class="text-truncate-custom" title="${record.material_description}">
+                            ${record.material_description}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="fill-rate-badge fill-rate-low">
+                            ${record.fill_rate_percent.toFixed(1)}%
+                        </span>
+                    </td>
+                    <td><small class="text-muted">${record.state}</small></td>
+                    <td><small class="text-muted">${record.plant_name}</small></td>
+                    <td><small class="text-muted">${record.feedback_date}</small></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function applyFilters() {
+            const userFilter = document.getElementById('user-filter').value;
+            const reasonFilter = document.getElementById('reason-filter').value;
+            const stateFilter = document.getElementById('state-filter').value;
+            const plantFilter = document.getElementById('plant-filter').value;
+            const dateFromFilter = document.getElementById('date-from-filter').value;
+            const dateToFilter = document.getElementById('date-to-filter').value;
+            
+            currentFilters = {
+                user: userFilter,
+                reason: reasonFilter,
+                state: stateFilter,
+                plant: plantFilter,
+                dateFrom: dateFromFilter,
+                dateTo: dateToFilter
+            };
+            
+            // Apply filters to both tables
+            await applyFeedbackFilters();
+            await applyPlantFilters();
+        }
+
+        async function applyFeedbackFilters() {
+            try {
+                document.getElementById('feedback-loading').style.display = 'block';
+                document.getElementById('feedback-data-container').style.display = 'none';
+                
+                let url = '/api/feedback-reports-data?';
+                const params = new URLSearchParams();
+                
+                if (currentFilters.user) params.append('user', currentFilters.user);
+                if (currentFilters.reason) params.append('reason', currentFilters.reason);
+                if (currentFilters.state) params.append('state', currentFilters.state);
+                if (currentFilters.plant) params.append('plant', currentFilters.plant);
+                if (currentFilters.dateFrom) params.append('date_from', currentFilters.dateFrom);
+                if (currentFilters.dateTo) params.append('date_to', currentFilters.dateTo);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    document.getElementById('feedback-loading').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error loading filtered data: ${result.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allFeedbackData = result.data;
+                displayFeedbackData(allFeedbackData);
+                
+                document.getElementById('feedback-loading').style.display = 'none';
+                document.getElementById('feedback-data-container').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error applying feedback filters:', error);
+                document.getElementById('feedback-loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading filtered data. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        async function applyPlantFilters() {
+            try {
+                document.getElementById('plant-loading').style.display = 'block';
+                document.getElementById('plant-data-container').style.display = 'none';
+                
+                let url = '/api/plant-feedback-stats?';
+                const params = new URLSearchParams();
+                
+                if (currentFilters.state) params.append('state', currentFilters.state);
+                if (currentFilters.plant) params.append('plant', currentFilters.plant);
+                if (currentFilters.dateFrom) params.append('date_from', currentFilters.dateFrom);
+                if (currentFilters.dateTo) params.append('date_to', currentFilters.dateTo);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    document.getElementById('plant-loading').innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error loading plant data: ${result.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allPlantData = result.plant_stats || [];
+                displayPlantData(allPlantData);
+                
+                document.getElementById('plant-loading').style.display = 'none';
+                document.getElementById('plant-data-container').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error applying plant filters:', error);
+                document.getElementById('plant-loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading plant data. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('user-filter').value = '';
+            document.getElementById('reason-filter').value = '';
+            document.getElementById('state-filter').value = '';
+            document.getElementById('plant-filter').value = '';
+            document.getElementById('date-from-filter').value = '';
+            document.getElementById('date-to-filter').value = '';
+            
+            currentFilters = {};
+            loadReportsData();
+            loadPlantFeedbackStats();
+        }
+
+        function setThisWeekFilter() {
+            const today = new Date();
+            const firstDay = new Date(today.setDate(today.getDate() - today.getDay()));
+            const lastDay = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+            
+            document.getElementById('date-from-filter').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('date-to-filter').value = lastDay.toISOString().split('T')[0];
+            
+            applyFilters();
+        }
+
+        function setThisMonthFilter() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('date-from-filter').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('date-to-filter').value = lastDay.toISOString().split('T')[0];
+            
+            applyFilters();
+        }
+
+        async function downloadFeedbackReports(event) {
+            event.preventDefault();
+            
+            try {
+                const downloadBtn = document.getElementById('download-feedback-btn');
+                const originalText = downloadBtn.innerHTML;
+                
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating...';
+                downloadBtn.style.pointerEvents = 'none';
+                
+                let url = '/api/download-feedback-reports';
+                const params = new URLSearchParams();
+                
+                if (currentFilters.user) params.append('user', currentFilters.user);
+                if (currentFilters.reason) params.append('reason', currentFilters.reason);
+                if (currentFilters.state) params.append('state', currentFilters.state);
+                if (currentFilters.plant) params.append('plant', currentFilters.plant);
+                if (currentFilters.dateFrom) params.append('date_from', currentFilters.dateFrom);
+                if (currentFilters.dateTo) params.append('date_to', currentFilters.dateTo);
+                
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = '';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.style.pointerEvents = 'auto';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Error downloading feedback reports. Please try again.');
+                
+                const downloadBtn = document.getElementById('download-feedback-btn');
+                downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download Excel';
+                downloadBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        async function downloadPlantReports(event) {
+            event.preventDefault();
+            
+            try {
+                const downloadBtn = document.getElementById('download-plant-btn');
+                const originalText = downloadBtn.innerHTML;
+                
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating...';
+                downloadBtn.style.pointerEvents = 'none';
+                
+                let url = '/api/download-plant-feedback-stats';
+                const params = new URLSearchParams();
+                
+                if (currentFilters.state) params.append('state', currentFilters.state);
+                if (currentFilters.plant) params.append('plant', currentFilters.plant);
+                if (currentFilters.dateFrom) params.append('date_from', currentFilters.dateFrom);
+                if (currentFilters.dateTo) params.append('date_to', currentFilters.dateTo);
+                
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = '';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.style.pointerEvents = 'auto';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Error downloading plant reports. Please try again.');
+                
+                const downloadBtn = document.getElementById('download-plant-btn');
+                downloadBtn.innerHTML = '<i class="fas fa-download me-1"></i>Download Excel';
+                downloadBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                applyFilters();
+            }
+            if (e.key === 'Escape') {
+                clearFilters();
+            }
+        });
+    </script>
+</body>
+</html>

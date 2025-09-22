@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fill Rate Feedback Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table th {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px 10px;
+        }
+
+        .table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .fill-rate-badge {
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        .fill-rate-low {
+            background-color: #fee;
+            color: var(--accent-color);
+            border: 1px solid #fcc;
+        }
+
+        .btn-feedback {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-feedback:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner-border {
+            color: var(--secondary-color);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-bar me-2"></i>
+                Fill Rate Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Dashboard Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="text-muted mb-1">Total Records</h5>
+                            <h3 class="text-primary mb-0" id="total-records">-</h3>
+                        </div>
+                        <div class="text-primary">
+                            <i class="fas fa-database fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="text-muted mb-1">Low Fill Rate</h5>
+                            <h3 class="text-danger mb-0" id="low-fill-rate">-</h3>
+                        </div>
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="text-muted mb-1">Average Fill Rate</h5>
+                            <h3 class="text-success mb-0" id="avg-fill-rate">-</h3>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="text-muted mb-1">Need Feedback</h5>
+                            <h3 class="text-warning mb-0" id="needs-feedback">-</h3>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-comment-dots fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-table">
+            <div class="table-header p-4 border-bottom">
+                <h4 class="mb-0"><i class="fas fa-table me-2"></i>Records with Fill Rate < 95%</h4>
+            </div>
+            <div id="loading" class="loading">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading data...</p>
+            </div>
+            <div id="data-container" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>PO No</th>
+                                <th>Material Description</th>
+                                <th>State</th>
+                                <th>Plant Name</th>
+                                <th>PO Quantity</th>
+                                <th>Sales Quantity</th>
+                                <th>Fill Rate %</th>
+                                <th>Processing Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-comment-medical me-2"></i>
+                        Submit Feedback
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="feedback-form">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Record Details:</strong></label>
+                            <div class="bg-light p-3 rounded">
+                                <div id="record-details"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reason-select" class="form-label">
+                                <i class="fas fa-list me-1"></i>Reason for Non-fulfillment *
+                            </label>
+                            <select class="form-select" id="reason-select" required>
+                                <option value="">Select a reason...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comments-text" class="form-label">
+                                <i class="fas fa-comment me-1"></i>Additional Comments
+                            </label>
+                            <textarea class="form-control" id="comments-text" rows="4" 
+                                      placeholder="Add any additional comments or details..."></textarea>
+                        </div>
+                        
+                        <div id="feedback-history" class="mt-4" style="display: none;">
+                            <h6><i class="fas fa-history me-2"></i>Previous Feedback</h6>
+                            <div id="history-list" class="border rounded p-3 bg-light">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="feedback-success" style="display: none;" class="text-center">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h5>Feedback Submitted Successfully!</h5>
+                        <p class="text-muted">Thank you for your feedback.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submit-feedback">
+                        <i class="fas fa-paper-plane me-1"></i>Submit Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentRecordId = null;
+        let allData = [];
+
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardStats();
+            loadLowFillRateData();
+            loadReasons();
+        });
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/dashboard-stats');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('Error loading stats:', data.error);
+                    return;
+                }
+                
+                document.getElementById('total-records').textContent = data.total_records.toLocaleString();
+                document.getElementById('low-fill-rate').textContent = data.low_fill_rate_count.toLocaleString();
+                document.getElementById('avg-fill-rate').textContent = data.average_fill_rate + '%';
+                document.getElementById('needs-feedback').textContent = data.needs_feedback.toLocaleString();
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Load low fill rate data
+        async function loadLowFillRateData() {
+            try {
+                const response = await fetch('/api/low-fill-rate-data');
+                const result = await response.json();
+                
+                if (result.error) {
+                    document.getElementById('loading').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Error loading data: ${result.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allData = result.data;
+                displayData(allData);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('data-container').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error loading data. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Display data in table
+        function displayData(data) {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <i class="fas fa-info-circle text-muted me-2"></i>
+                            No records found with fill rate < 95%
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${record.po_no}</strong></td>
+                    <td>
+                        <div class="text-truncate" style="max-width: 200px;" title="${record.material_description}">
+                            ${record.material_description}
+                        </div>
+                    </td>
+                    <td><span class="badge bg-info">${record.state}</span></td>
+                    <td><span class="badge bg-secondary">${record.plant_name}</span></td>
+                    <td>${record.po_quantity.toLocaleString()}</td>
+                    <td>${record.sales_quantity.toLocaleString()}</td>
+                    <td>
+                        <span class="fill-rate-badge fill-rate-low">
+                            ${record.fill_rate_percent.toFixed(1)}%
+                        </span>
+                    </td>
+                    <td>${record.processing_date}</td>
+                    <td>
+                        <button class="btn btn-feedback btn-sm" onclick="openFeedbackModal(${record.id})">
+                            <i class="fas fa-comment me-1"></i>Feedback
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Load reasons for dropdown
+        async function loadReasons() {
+            try {
+                const response = await fetch('/api/reasons');
+                const data = await response.json();
+                
+                const select = document.getElementById('reason-select');
+                select.innerHTML = '<option value="">Select a reason...</option>';
+                
+                data.reasons.forEach(reason => {
+                    const option = document.createElement('option');
+                    option.value = reason;
+                    option.textContent = reason;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading reasons:', error);
+            }
+        }
+
+        // Open feedback modal
+        function openFeedbackModal(recordId) {
+            currentRecordId = recordId;
+            const record = allData.find(r => r.id === recordId);
+            
+            if (!record) return;
+            
+            // Reset form
+            document.getElementById('reason-select').value = '';
+            document.getElementById('comments-text').value = '';
+            document.getElementById('feedback-form').style.display = 'block';
+            document.getElementById('feedback-success').style.display = 'none';
+            document.querySelector('.modal-footer').style.display = 'flex';
+            
+            // Set record details
+            document.getElementById('record-details').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>PO No:</strong> ${record.po_no}<br>
+                        <strong>Material:</strong> ${record.material_description}<br>
+                        <strong>State:</strong> ${record.state}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Plant:</strong> ${record.plant_name}<br>
+                        <strong>Fill Rate:</strong> ${record.fill_rate_percent.toFixed(1)}%<br>
+                        <strong>Date:</strong> ${record.processing_date}
+                    </div>
+                </div>
+            `;
+            
+            // Load feedback history
+            loadFeedbackHistory(recordId);
+            
+            // Show modal
+            new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+        }
+
+        // Load feedback history
+        async function loadFeedbackHistory(recordId) {
